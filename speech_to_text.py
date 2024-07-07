@@ -50,6 +50,4 @@ if __name__ == "__main__":
     translated_audio_path = text_to_speech(translated_text)
     print(f"Translated text converted to speech and saved as {translated_audio_path}")
 
-    # Step 7: Overlay translated audio onto the original video
-    overlay_audio(video_path, translated_audio_path, output_video_path)
-    print(f"Final video with translated audio saved as {output_video_path}")
+   
