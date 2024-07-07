@@ -1,20 +1,10 @@
+# main.py
+
 import speech_recognition as sr
-from pydub import AudioSegment
-from pydub.silence import split_on_silence
-from translate_text import translate_text, write_to_file # Import the translate_text function
-
-def split_audio(audio_path):
-    sound = AudioSegment.from_wav(audio_path)
-    chunks = split_on_silence(sound, min_silence_len=500, silence_thresh=sound.dBFS-14, keep_silence=500)
-    return chunks
-
-def save_chunks(chunks, base_filename):
-    filenames = []
-    for i, chunk in enumerate(chunks):
-        chunk_filename = f"{base_filename}_chunk{i}.wav"
-        chunk.export(chunk_filename, format="wav")
-        filenames.append(chunk_filename)
-    return filenames
+from split_audio import split_audio, save_chunks
+from translate_text import translate_text, write_to_file
+from text_to_speech import text_to_speech
+from overlay_audio import overlay_audio
 
 def speech_to_text(audio_paths):
     recognizer = sr.Recognizer()
@@ -32,16 +22,34 @@ def speech_to_text(audio_paths):
     return full_text
 
 if __name__ == "__main__":
+    video_path = "video.mp4"  # Replace with the path to your video file
     audio_path = "audio.wav"  # Replace with the path to your audio file
-    output_file="translated_text.txt"
-    
+    output_file = "translated_text.txt"
+    output_video_path = "final_video.mp4"
+
+    # Step 1: Extract audio from video (if needed)
+    # audio_path = extract_audio(video_path)
+
+    # Step 2: Split audio into chunks
     chunks = split_audio(audio_path)
     chunk_files = save_chunks(chunks, "chunk")
+
+    # Step 3: Convert speech to text
     text = speech_to_text(chunk_files)
     print(f"Extracted Text: {text}")
 
+    # Step 4: Translate text to Kannada
     translated_text = translate_text(text)
     print(f"Translated Text: {translated_text}")
 
+    # Step 5: Write translated text to file
     write_to_file(translated_text, output_file)
     print(f"Translated text saved to {output_file}")
+
+    # Step 6: Convert translated text to speech
+    translated_audio_path = text_to_speech(translated_text)
+    print(f"Translated text converted to speech and saved as {translated_audio_path}")
+
+    # Step 7: Overlay translated audio onto the original video
+    overlay_audio(video_path, translated_audio_path, output_video_path)
+    print(f"Final video with translated audio saved as {output_video_path}")
